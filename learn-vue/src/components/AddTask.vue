@@ -41,7 +41,7 @@ export default {
              return 
           }
           const newTask = {
-              id: Math.floor(Math.random()*1e5),
+              // id: Math.floor(Math.random()*1e5),
               text: this.text,
               day: this.day,
               reminder: this.reminder,
