@@ -9,7 +9,8 @@
       <AddTask @add-task="addTask" />
     </div>
     <Tasks
-      @toggle-reminder="toggleReminder"
+      @toggle-reminder="toggleReminder"      
+      @toggle-update-task-text="updTaskText"       
       @deleteTask="deleteTask"
       :tasks="tasks"
     />
@@ -34,11 +35,21 @@ export default {
     return {
       tasks: [],
       showAddTask: false,
+      showUpdateTask: true,
     };
+  },
+  computed:{
+
   },
   methods: {
     toggleAddTask() {
       this.showAddTask = !this.showAddTask;
+    },
+    toggleUpdateTask() {
+      this.showUpdateTask = !this.showUpdateTask;
+    },
+    updTaskText(id) {
+      console.log("Update task, id: ", id);
     },
     async addTask(task) {
       const res = await fetch("api/tasks", {
@@ -64,10 +75,13 @@ export default {
       }
     },
     async toggleReminder(id) {
+      // to update a part of db entry:
+      //1. fetch the item
       const taskToToggle = await this.fetchTask(id);
-      const updTask = { ...taskToToggle, reminder:
-        !taskToToggle.reminder };
+      //define what to update
+      const updTask = { ...taskToToggle, reminder: !taskToToggle.reminder };
 
+      //make request to db server
       const res = await fetch(`api/tasks/${id}`, {
         method: "PUT",
         headers: {
@@ -76,15 +90,20 @@ export default {
         body: JSON.stringify(updTask),
       });
 
+      // parse the data
       const data = await res.json();
+
+      //in this instance we are accessing this.task (this, since we are accessing a specific data)
       this.tasks = this.tasks.map((task) =>
+        //if the task id is equal to the id that is being passed,
+        //the reminder is being set to the oppsite of the previous value, i.e. from true to false and vice versa
         task.id === id ? { ...task, reminder: data.reminder } : task
       );
       // this.tasks = this.tasks.map((task) =>
       //       task.id === id ? { ...task, reminder: data.reminder } : task
       //     )
     },
-    
+
     //the api is from the vue.config.js.
     async fetchTasks() {
       const res = await fetch("api/tasks");
